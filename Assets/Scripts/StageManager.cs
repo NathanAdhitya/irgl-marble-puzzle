@@ -8,6 +8,7 @@ public class StageManager : MonoBehaviour
 {
 	StageSectionManager[] selectedSections;
 	public GameObject gameMessage;
+	private GameController gameController;
 
 	// Check whether marble collides multiple stages
 	// If it is, then return false
@@ -117,24 +118,12 @@ public class StageManager : MonoBehaviour
 		}
 
 		// Pause game if there are selected
-		if (selectedSections.Length > 0)
-		{
-			Time.timeScale = 0;
-		}
-		else
-		{
-			Time.timeScale = 1;
-		}
+		gameController.OnSectionSelectionChange(selectedSections.Length > 0);
 	}
 
 	void Start()
 	{
 		selectedSections = Array.Empty<StageSectionManager>();
-	}
-
-	// Update is called once per frame
-	void Update()
-	{
-
+		gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
 	}
 }
