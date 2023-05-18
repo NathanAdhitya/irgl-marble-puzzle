@@ -89,6 +89,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba7f077f617df994e8a15958957d085e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultColor: {r: 0, g: 0, b: 0, a: 0}
-  hoverColor: {r: 0, g: 0, b: 0, a: 0}
-  selectColor: {r: 0, g: 0, b: 0, a: 0}
+  defaultColor: {r: 0.43921572, g: 0.6745098, b: 0.8117648, a: 0}
+  hoverColor: {r: 0.45882356, g: 0.8352942, b: 0.9843138, a: 1}
+  selectColor: {r: 0.3700605, g: 0.6726699, b: 0.7924528, a: 1}

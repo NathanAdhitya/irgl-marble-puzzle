@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Stages
+  - StageSection
+  - GameMessage
   layers:
   - Default
   - TransparentFX
