@@ -9,21 +9,83 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
-	public DateTime startTime;
-	public TimeSpan finalTime;
-	public TextMeshProUGUI timerText;
-	public GameObject gameModal;
-	public GameObject deathModal;
-	public GameObject finishModal;
-	public GameObject confirmModal;
+	private DateTime startTime;
+	private TimeSpan finalTime;
+	public GameObject gameModalPrefab;
+	public GameObject sideUIPrefab;
+	private GameObject sideUI;
+	private GameObject topUI;
+	public GameObject topUIPrefab;
+	private TextMeshProUGUI timerText;
+	private GameObject gameModal;
+	private GameObject deathModal;
+	private GameObject finishModal;
+	private GameObject confirmModal;
+	private GameObject gameArena;
 	private bool sectionSelectionPause;
 	private bool isPaused;
+	public String levelName = "Unnamed Level";
 
-	void Start()
+	void Awake()
 	{
 		startTime = new DateTime(System.DateTime.Now.Ticks);
 		sectionSelectionPause = false;
 		isPaused = false;
+
+		// Create the modal
+		gameModal = Instantiate(gameModalPrefab);
+
+		// Bind Camera to modal
+		gameModal.GetComponent<Canvas>().worldCamera = Camera.main;
+
+		// Fill in all the other modals
+		deathModal = gameModal.transform.Find("DiedPanel").gameObject;
+		finishModal = gameModal.transform.Find("FinishPanel").gameObject;
+		confirmModal = gameModal.transform.Find("ConfirmPanel").gameObject;
+
+		// Bind all the modal buttons.
+		confirmModal.transform.Find("ButtonContainer/No")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(CloseAllModals);
+		deathModal.transform.Find("ButtonContainer/Try Again")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(RestartLevel);
+		deathModal.transform.Find("ButtonContainer/Return")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(ReturnToMainMenu);
+		finishModal.transform.Find("ButtonContainer/Return")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(ReturnToMainMenu);
+		finishModal.transform.Find("ButtonContainer/Try Again")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(RestartLevel);
+		CloseAllModals();
+
+		// Get GameArena
+		gameArena = GameObject.Find("GameArena");
+
+		// Create Board Side UI
+		sideUI = Instantiate(sideUIPrefab, gameArena.transform);
+
+		// Correct camera and buttons
+		sideUI.GetComponent<Canvas>().worldCamera = Camera.main;
+		sideUI.transform.Find("ExitButton")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(OpenExitModal);
+		sideUI.transform.Find("RestartButton")
+			.GetComponent<UnityEngine.UI.Button>()
+			.onClick.AddListener(OpenRetryModal);
+
+		// Create Top UI
+		topUI = Instantiate(topUIPrefab, gameArena.transform);
+
+		// Set Level Name
+		topUI.transform.Find("LevelName").GetComponent<TextMeshProUGUI>().text = levelName;
+
+		// Set timer text
+		timerText = topUI.transform.Find("TimerText").GetComponent<TextMeshProUGUI>();
+
+		Camera.main.GetComponent<FocusController>().target = gameArena;
 	}
 
 	void Update()
@@ -115,7 +177,7 @@ public class GameController : MonoBehaviour
 
 	public void ReturnToMainMenu()
 	{
-		SceneManager.LoadScene("Main Menu");
+		SceneManager.LoadScene("Level Selector");
 	}
 
 	public void RestartLevel()
