@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -30,6 +29,7 @@ public class GameController : MonoBehaviour
 		startTime = new DateTime(System.DateTime.Now.Ticks);
 		sectionSelectionPause = false;
 		isPaused = false;
+		ProcessPause();
 
 		// Create the modal
 		gameModal = Instantiate(gameModalPrefab);
