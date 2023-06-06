@@ -13,7 +13,7 @@ public class StageManager : MonoBehaviour
 	// Check whether marble collides multiple stages
 	// If it is, then return false
 	// If it isn't, then return true
-	public Boolean IsBallInMultipleStages()
+	public GameObject[] GetBallTouchingStages()
 	{
 
 		BoxCollider2D[] colliders = transform.Cast<Transform>()
@@ -30,27 +30,16 @@ public class StageManager : MonoBehaviour
 
 		Debug.Log("Count: " + count);
 
-		if (count == 1)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
+		return colliders.Where(
+			collider =>
+			collider.IsTouching(marbleCollider))
+			.Select(collider => collider.gameObject)
+			.ToArray();
 	}
 
 	// Fragile code. TODO: fix
 	public void OnSectionSelect(StageSectionManager section)
 	{
-		bool isBallInMultipleStages = IsBallInMultipleStages();
-		if (isBallInMultipleStages)
-		{
-			gameMessage.GetComponent<GameMessage>().ShowMessage("Stages are locked. Ball is in multiple stages", 2);
-			Debug.Log("Ball is in multiple stages");
-			return;
-		}
-
 		// If it contains, then remove.
 		if (selectedSections.Contains(section))
 		{
@@ -59,6 +48,21 @@ public class StageManager : MonoBehaviour
 		}
 		else
 		{
+			GameObject[] ballTouchingStages = GetBallTouchingStages();
+			if (ballTouchingStages.Length > 1 && selectedSections.Length == 1)
+			{
+				// Check whether the ball is in selections
+				if (
+					ballTouchingStages.Contains(selectedSections[0].gameObject)
+					|| ballTouchingStages.Contains(section.gameObject)
+					)
+				{
+					gameMessage.GetComponent<GameMessage>().ShowMessage("Stages are locked. Ball is in multiple stages", 2);
+					Debug.Log("Ball is in multiple stages");
+					return;
+				}
+			}
+
 			// If it doesn't contain, then add.
 			selectedSections = selectedSections.Append(section).ToArray();
 			section.isSelected = true;

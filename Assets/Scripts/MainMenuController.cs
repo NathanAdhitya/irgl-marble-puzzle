@@ -13,5 +13,8 @@ public class MainMenuController : MonoBehaviour
 	public void GoToLevelSelector()
 	{
 		SceneManager.LoadScene("Level Selector");
+
+		// Load scores for team
+		StaticData.LoadScoresForTeam();
 	}
 }

@@ -23,9 +23,14 @@ public class GameController : MonoBehaviour
 	private bool sectionSelectionPause;
 	private bool isPaused;
 	public String levelName = "Unnamed Level";
+	public int maxScore = 500;
+	public int minScore = 100;
+	public int scoreDownTime = 30;
+	private TimeSpan scoreDownTimeSpan;
 
 	void Awake()
 	{
+		scoreDownTimeSpan = new TimeSpan(0, 0, scoreDownTime);
 		startTime = new DateTime(System.DateTime.Now.Ticks);
 		sectionSelectionPause = false;
 		isPaused = false;
@@ -98,11 +103,26 @@ public class GameController : MonoBehaviour
 			timerText.text = (new DateTime(System.DateTime.Now.Ticks) - startTime).ToString("mm\\:ss\\.fff");
 	}
 
+	private int CalculateScore()
+	{
+		return (int)Math.Max(
+			maxScore - Math.Max(
+				(finalTime - scoreDownTimeSpan).TotalSeconds,
+				0
+			),
+			minScore
+		);
+	}
+
 	private void ProcessPause()
 	{
-		if (sectionSelectionPause || isPaused)
+		if (isPaused)
 		{
 			Time.timeScale = 0;
+		}
+		else if (sectionSelectionPause)
+		{
+			Time.timeScale = 0.25f;
 		}
 		else
 		{
@@ -123,21 +143,31 @@ public class GameController : MonoBehaviour
 		ProcessPause();
 		finalTime = new DateTime(System.DateTime.Now.Ticks) - startTime;
 
+		// Calculate score
+		int score = CalculateScore();
+
 		// Store final time and team name in PlayerPrefs
-		AppendTimeToLocalFileAsync(StaticData.currentTeamName, SceneManager.GetActiveScene().name, finalTime);
+		AppendTimeToLocalFileAsync(StaticData.currentTeamName, SceneManager.GetActiveScene().name, finalTime, score);
+
+		// Store final time in staticdata
+		StaticData.scoreDatas.Add(new ScoreData(StaticData.currentTeamName, SceneManager.GetActiveScene().name, finalTime, score));
 
 		// Show finish modal
 		finishModal.SetActive(true);
 		gameModal.SetActive(true);
 
-		// Show time in finish modal
-		finishModal.transform.Find("Content").GetComponent<TextMeshProUGUI>().text = "Your time: " + finalTime.ToString("mm\\:ss\\.fff");
+		// Show time, score, and high score in finish modal
+		String modalContent = "Your time: " + finalTime.ToString("mm\\:ss\\.fff") + "\n" +
+			"Your score: " + score + "\n" +
+			"High score: " + StaticData.GetHighestScore(SceneManager.GetActiveScene().name);
+		finishModal.transform.Find("Content").GetComponent<TextMeshProUGUI>().text = modalContent;
 	}
 
-	async private void AppendTimeToLocalFileAsync(String teamName, String levelName, TimeSpan timeSpan)
+	async private void AppendTimeToLocalFileAsync(String teamName, String levelName, TimeSpan timeSpan, int score)
 	{
 		String path = Application.persistentDataPath + "/times.csv";
-		String toAppend = teamName.Replace(",", "\\,") + "," + levelName + "," + timeSpan.ToString("mm\\:ss\\.fff") + "\n";
+		ScoreData sd = new ScoreData(teamName, levelName, timeSpan, score);
+		String toAppend = sd.ToString() + "\n";
 		await System.IO.File.AppendAllTextAsync(path, toAppend);
 		Debug.Log("Written to file: " + toAppend);
 	}

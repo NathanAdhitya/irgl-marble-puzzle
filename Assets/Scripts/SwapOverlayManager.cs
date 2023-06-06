@@ -24,26 +24,30 @@ public class SwapOverlayManager : MonoBehaviour, IPointerEnterHandler, IPointerE
 
 	void Update()
 	{
-		Color targetColor;
+		// Color targetColor;
 
 		if (stageSectionManager.isSelected)
 		{
-			targetColor = selectColor;
+			// fast flash between hover and select color
+			float t = Mathf.PingPong(Time.realtimeSinceStartup, 0.3f) / 0.5f;
+			setColor(Color.Lerp(selectColor, Color.white, t));
 		}
 		else if (isHovered)
 		{
-			targetColor = hoverColor;
+			// fast flash between white and hover color
+			float t = Mathf.PingPong(Time.realtimeSinceStartup, 0.5f) / 0.5f;
+			setColor(Color.Lerp(hoverColor, selectColor, t));
 		}
 		else
 		{
-			targetColor = defaultColor;
+			image.color = defaultColor;
 		}
 
-		if (image.color != targetColor)
-		{
-			Color lerpedColor = Color.Lerp(image.color, targetColor, 0.2f);
-			setColor(lerpedColor);
-		}
+		// if (image.color != targetColor)
+		// {
+		// 	Color lerpedColor = Color.Lerp(image.color, targetColor, 0.2f);
+		// 	setColor(lerpedColor);
+		// }
 
 	}
 
